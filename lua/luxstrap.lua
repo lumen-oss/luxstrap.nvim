@@ -30,6 +30,7 @@ function luxstrap.install_lux_lua(cb)
 
     if vim.fn.filereadable(dest) == 1 then
         package.cpath = install_dir .. "/?" .. ext .. ";" .. package.cpath
+        vim.cmd.runtime("plugin/lux-nvim.lua")
         return
     end
 
@@ -50,7 +51,7 @@ function luxstrap.install_lux_lua(cb)
 
         package.cpath = install_dir .. "/?" .. ext .. ";" .. package.cpath
 
-        vim.notify("luxstrap: installed to " .. dest)
+        vim.notify("luxstrap: lux-lua installed to " .. dest)
 
         cb()
     end))
@@ -78,22 +79,10 @@ function luxstrap.install_lux_nvim(lux)
     local coro = require("luxstrap.coroutine")
 
     coro.execute(function()
-        local pkgs = lux.operations.install({ { package = "lux.nvim" }, { package = "rtp.nvim" } }, tree, config)
-
-        local rtp_nvim_pkg = vim.iter(pkgs):find(function(pkg) return pkg:name() == "rtp.nvim" end)
-
-        local layout = tree:rock_layout(rtp_nvim_pkg)
-
-        package.path = package.path .. ";" .. string.format("%s/?.lua;%s/?/init.lua", layout.src, layout.src)
-        package.cpath = package.cpath .. ";" .. string.format("%s/?.so;%s/?.dll", layout.lib, layout.lib)
+        lux.operations.install({ { package = "lux.nvim" } }, tree, config)
 
         vim.opt.runtimepath:append(tree:root() .. "/site/pack/lux/start/lux.nvim")
         vim.cmd.runtime("plugin/lux-nvim.lua")
-
-        -- local rtp = require("rtp_nvim")
-        --
-        -- rtp.source_rtp_dir(tree:root() .. "/site/pack/lux/start/lux.nvim")
-        -- package.path = package.path .. ";" .. string.format("%s/?.lua;%s/?/init.lua", layout.src, layout.src)
 
         vim.notify("luxstrap: lux.nvim downloaded successfully")
 
